@@ -4,8 +4,6 @@
  */
 package astar;
 
-import java.util.ArrayList;
-
 /**
  *
  * @author Ociel
@@ -16,11 +14,12 @@ public class Node {
     public int Heuristics;
     public int Cost;
     public int Score;
-    public ArrayList<Node> ChildNodes = new ArrayList<>();
+    public Node Parent;
     
-    public Node (String pID)
+    public Node (String pID, Node pParent)
     {
         ID = pID;
+        Parent = pParent;
     }
     
     public int CalculateHeuristics (int pX, int pY, int pGoalX, int pGoalY)
@@ -44,10 +43,5 @@ public class Node {
     {
         Score = Heuristics + Cost;
         return Score;
-    }
-    
-    public void AddChildNode (Node pChildNode)
-    {
-        ChildNodes.add(pChildNode);
     }
 }

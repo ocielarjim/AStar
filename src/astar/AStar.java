@@ -23,15 +23,22 @@ public class AStar {
         Map = pMap;
     }
     
-    public Coordinate FindInitPosition ()
+    private Coordinate FindInitPosition ()
     {
+        Coordinate _coordinate = new Coordinate();
         for (int i = 0; i < Map.length; i++)
         {
             for (int j = 0; j < Map[0].length; i++)
             {
-                if (Map[i][j] != 'i')
+                if (Map[i][j] == 'i')
+                {
+                    _coordinate.X = i;
+                    _coordinate.Y = j;
+                    return _coordinate;
+                } 
             }
         }
+        return null;
     }
     
     /**

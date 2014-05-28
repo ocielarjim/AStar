@@ -12,10 +12,4 @@ public class Coordinate {
     
     public int X;
     public int Y;
-    
-    public Coordinate (int pX, int pY)
-    {
-        X = pX;
-        Y = pY;
-    }
 }
