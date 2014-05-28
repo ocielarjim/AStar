@@ -14,7 +14,7 @@ import java.io.IOException;
  */
 public class TestGUI extends javax.swing.JFrame {
 
-    String[][] Map;
+    String[][] Map = new String[10][];
     /**
      * Creates new form TestGUI
      */
@@ -32,7 +32,7 @@ public class TestGUI extends javax.swing.JFrame {
             br = new BufferedReader(new FileReader(pFile));
             while ((line = br.readLine()) != null)
             {
-                Map = new String[line.length()][count];
+                Map[count] = new String[line.length()];
                 for (int i = 0; i < line.length(); i++)
                     Map[i][count] = line.substring(i,1);
                 System.out.println(line);
