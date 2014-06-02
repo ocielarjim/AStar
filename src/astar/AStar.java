@@ -17,14 +17,40 @@ public class AStar {
     public ArrayList<Node> CloseList = new ArrayList<>();
     //Mapa del tablero
     char[][] Map;
-    //Coordenadas del Nodo Final;
-    Coordinate _coordinateEnd;
+    //Coordenadas para Nodo Final y Nodo Inicial;
+    public Coordinate _coordinateEnd;
+    public Coordinate _coordinateInit;
+    
     
     public AStar (char[][] pMap)
     {
         Map = pMap;
+        _coordinateInit = this.FindInitPosition();
         _coordinateEnd = this.FindGoalPosition();
-        this.InitProcess();
+    }
+    
+    public AStar (Node pRootTree)
+    {
+        
+    }
+    
+    public Node InitProcess ()
+    {
+        Node CurrentNode;
+        Node NodeInit = new Node("Init", FindInitPosition(), null, _coordinateEnd, 0);
+        OpenList.add(NodeInit);
+        CurrentNode = OpenList.get(0);
+        while (!isEndNode(CurrentNode) && !OpenList.isEmpty())
+        {
+            OpenList.remove(0);
+            CloseList.add(CurrentNode);
+            CurrentNode.ChildsNodes = this.GenerateChildsNodes(CurrentNode);
+            CurrentNode.ChildsNodes = this.ClearChildsNodes(CurrentNode.ChildsNodes);
+            CurrentNode.ChildsNodes = this.SortBestScoreChildsNodes(CurrentNode);
+            this.AddOpenList(CurrentNode.ChildsNodes);
+            CurrentNode = OpenList.get(0);
+        }
+        return CurrentNode;
     }
     
     private Coordinate FindInitPosition ()
@@ -38,6 +64,7 @@ public class AStar {
                 {
                     _coordinate.X = i;
                     _coordinate.Y = j;
+                    _coordinateInit = _coordinate;
                     return _coordinate;
                 } 
             }
@@ -63,26 +90,17 @@ public class AStar {
         return null;
     }
     
-    private void InitProcess ()
+    private void AddOpenList (ArrayList<Node> pChildNodes)
     {
-        Node CurrentNode;
-        Node NodeInit = new Node("Init", FindInitPosition(), null, _coordinateEnd);
-        OpenList.add(NodeInit);
-        CurrentNode = OpenList.get(0);
-        while (!isEndNode(CurrentNode) && !OpenList.isEmpty())
+        for (int i = 0; i < pChildNodes.size(); i++)
         {
-            OpenList.remove(0);
-            CloseList.add(CurrentNode);
-            CurrentNode.ChildsNodes = this.GenerateChildsNodes(CurrentNode);
-            CurrentNode.ChildsNodes = this.ClearChildsNodes(CurrentNode.ChildsNodes);
-            OpenList.addAll(CurrentNode.ChildsNodes);
-            CurrentNode = OpenList.get(0);
+            OpenList.add(0, pChildNodes.get(i));
         }
     }
     
     private boolean isEndNode (Node pCurrentNode)
     {
-        if (pCurrentNode.Coordinates == _coordinateEnd)
+        if (pCurrentNode.Coordinates.CompareTo(_coordinateEnd))
             return true;
         return false;
     }
@@ -90,35 +108,46 @@ public class AStar {
     private ArrayList<Node> GenerateChildsNodes (Node pCurrentNode)
     {
         ArrayList<Node> _childsNodes = new ArrayList<>();
+        Coordinate _eval_coordinates;// = new Coordinate();
         for (int i = -1; i <= 1; i++)
         {
             for (int j = -1; j <=1; j++)
             {
-                if (!(i == pCurrentNode.Coordinates.X && j == pCurrentNode.Coordinates.Y))
+                _eval_coordinates = new Coordinate();
+                _eval_coordinates.X = pCurrentNode.Coordinates.X + i;
+                _eval_coordinates.Y = pCurrentNode.Coordinates.Y + j;
+                
+                if (!_eval_coordinates.CompareTo(pCurrentNode.Coordinates))//verifica que no sea el nodo actual
                 {
-                    if (pCurrentNode.Coordinates.X + i >=0 &&
-                        pCurrentNode.Coordinates.Y + j >=0 &&
-                        Map[pCurrentNode.Coordinates.X + i][pCurrentNode.Coordinates.Y + j] == 'c')
+                    if (_eval_coordinates.X >= 0 && _eval_coordinates.Y >= 0 &&
+                        _eval_coordinates.X < Map.length && _eval_coordinates.Y < Map[0].length)//evalua que se encuentra dentro del limite del arreglo
                     {
-                        Coordinate _childCordinate = new Coordinate();
-                        _childCordinate.X = pCurrentNode.Coordinates.X + i;
-                        _childCordinate.Y = pCurrentNode.Coordinates.Y + j;
-                        _childsNodes.add(new Node(null, _childCordinate, pCurrentNode, _coordinateEnd));
+                        if ((_eval_coordinates.X == pCurrentNode.Coordinates.X ||
+                            _eval_coordinates.Y == pCurrentNode.Coordinates.Y))//evalua horizontales y verticales
+                        {
+                            if (Map[_eval_coordinates.X][_eval_coordinates.Y] == 'c' ||
+                                Map[_eval_coordinates.X][_eval_coordinates.Y] == 'f')//evalua que sea un camino
+                                _childsNodes.add(new Node(null, _eval_coordinates, pCurrentNode, _coordinateEnd, 10));
+                        }
                     }
                 }
             }
         }
-        //sort for best score
+        return _childsNodes;
+    }
+
+    private ArrayList<Node> SortBestScoreChildsNodes (Node pCurrentNode)
+    {
+        ArrayList<Node> _childsNodes = pCurrentNode.ChildsNodes;
         Node temp_node;
         for (int i = 0; i < _childsNodes.size(); i++)
         {
-            for (int j = i + 1; j < _childsNodes.size(); i++)
+            for (int j = i + 1; j < _childsNodes.size(); j++)
             {
                 if (_childsNodes.get(i).Score < _childsNodes.get(j).Score)
                 {
-                    temp_node = _childsNodes.get(i);
-                    _childsNodes.add(i, _childsNodes.get(j));
-                    _childsNodes.add(j, temp_node);
+                    temp_node = _childsNodes.set(i, _childsNodes.get(j));
+                    _childsNodes.set(j, temp_node);
                 }
             }
         }
@@ -129,23 +158,24 @@ public class AStar {
     {
         for (int i = 0; i < pChildsNodes.size(); i++)
         {
-            int Index = OpenList.indexOf(pChildsNodes.get(i));
-            if (Index != -1)
-                pChildsNodes.remove(i);
-        }
-        for (int i = 0; i < pChildsNodes.size(); i++)
-        {
-            int Index = CloseList.indexOf(pChildsNodes.get(i));
-            if (Index != -1)
-                pChildsNodes.remove(i);
+            for (int j = 0; j < OpenList.size(); j++)
+            {
+                if (pChildsNodes.get(i).Coordinates.CompareTo(OpenList.get(j).Coordinates))
+                {
+                    pChildsNodes.remove(i);
+                    break;
+                }
+            }
+            for (int j = 0; j < CloseList.size(); j++)
+            {
+                if (pChildsNodes.get(i).Coordinates.CompareTo(CloseList.get(j).Coordinates))
+                {
+                    pChildsNodes.remove(i);
+                    break;
+                }
+                    
+            }
         }
         return pChildsNodes;
-    }
-    
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String[] args) {
-        // TODO code application logic here
     }
 }
