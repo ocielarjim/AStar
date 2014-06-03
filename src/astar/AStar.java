@@ -29,11 +29,6 @@ public class AStar {
         _coordinateEnd = this.FindGoalPosition();
     }
     
-    public AStar (Node pRootTree)
-    {
-        
-    }
-    
     public Node InitProcess ()
     {
         Node CurrentNode;

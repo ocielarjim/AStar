@@ -5,13 +5,16 @@
 package GUI;
 
 import astar.AStar;
+import astar.AStarTree;
 import astar.Coordinate;
 import astar.Node;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -19,10 +22,16 @@ import javax.swing.JLabel;
  */
 public class TestGUI extends javax.swing.JFrame {
 
+    //Modalidad Grafica
     ArrayList<char[]> Map = new ArrayList<>();
     JLabel[][] imageMap;
     char[][] tMap;
     AStar _astar;
+    
+    //Modalidad Arbol
+    ArrayList<Node> Nodes = new ArrayList<>();
+    int[][] Costs;
+    AStarTree _astartree;
     
     public TestGUI()
     {
@@ -52,34 +61,41 @@ public class TestGUI extends javax.swing.JFrame {
 	}
     }
     
-    private Node LoadTree (String pFile)
+    private void LoadTree (String pFile)
     {
-        ArrayList<Node> Nodes = new ArrayList<>();
         BufferedReader br = null;
         try
         {
-            int estado = -1;
+            int status = -1;
             String line;
+            boolean declarecost = false;
             br = new BufferedReader(new FileReader(pFile));
             while ((line = br.readLine()) != null)
             {
                 if (line.contains("$"))
-                    estado++;
+                    status++;
+                
                 if (!line.contains("#") && !line.contains("$"))
                 {
-                    if (estado == 0)
+                    if (status == 0)
                     {
                         String[] Info = line.split(",");
                         Nodes.add(new Node(Info[0], Integer.parseInt(Info[1])));
                     }
-                    if (estado == 1)
+                    if (status == 1)
                     {
+                        if (!declarecost)
+                        {
+                            Costs = new int[Nodes.size()][Nodes.size()];
+                            declarecost = true;
+                        }
+                        
                         String[] Values = line.split("-");
                         for (int i = 0; i < Nodes.size(); i++)
                         {
                             if (Nodes.get(i).ID.equalsIgnoreCase(Values[0]))
                             {
-                                String[] Childs = Values[1].substring(1, Values[1].length()-1).split(",");
+                                String[] Childs = Values[1].split(",");
                                 for (int j = 0; j <  Childs.length; j++)
                                 {
                                     String[] ChildValue = Childs[j].split("&");
@@ -88,38 +104,14 @@ public class TestGUI extends javax.swing.JFrame {
                                         if (Nodes.get(k).ID.equalsIgnoreCase(ChildValue[0]))
                                         {
                                             Nodes.get(i).ChildsNodes.add(0, Nodes.get(k));
-                                            Nodes.get(i).ChildsNodes.get(0).Parent = Nodes.get(i);
-                                            Nodes.get(i).ChildsNodes.get(0).Cost = Integer.valueOf(ChildValue[1]);
-                                            //Nodes.get(i).ChildsNodes.get(0).CalculateCost(Nodes.get(i).Cost, Integer.valueOf(ChildValue[1]));
-                                            //Nodes.get(i).ChildsNodes.get(0).CalculateScore();
+                                            int indexX = Values[0].charAt(0) - 65;
+                                            int indexY = ChildValue[0].charAt(0) - 65;
+                                            Costs[indexX][indexY] = Integer.valueOf(ChildValue[1]);
                                             break;
                                         }
                                     }
                                 }
                                 break;
-                            }
-                        }
-                    }
-                    if (estado == 2)
-                    {
-                        for (int i = 0; i < Nodes.size(); i++)
-                        {
-                            if (Nodes.get(i).ID.equalsIgnoreCase(line))
-                            {
-                                Nodes.get(i).PosNode = "end";
-                                break;
-                            }
-                            
-                        }
-                    }
-                    if (estado == 3)
-                    {
-                        for (int i = 0; i < Nodes.size(); i++)
-                        {
-                            if (Nodes.get(i).ID.equalsIgnoreCase(line))
-                            {
-                                Nodes.get(i).PosNode = "init";
-                                return Nodes.get(i);
                             }
                         }
                     }
@@ -131,7 +123,6 @@ public class TestGUI extends javax.swing.JFrame {
         {
             System.out.println(e.getMessage());
 	}
-        return null;
     }
     
     private char[][] TransformMap ()
@@ -161,7 +152,7 @@ public class TestGUI extends javax.swing.JFrame {
     }
     
     @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">                          
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
         jButton1 = new javax.swing.JButton();
@@ -190,14 +181,14 @@ public class TestGUI extends javax.swing.JFrame {
         PanelMap.setLayout(PanelMapLayout);
         PanelMapLayout.setHorizontalGroup(
             PanelMapLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 348, Short.MAX_VALUE)
+            .addGap(0, 0, Short.MAX_VALUE)
         );
         PanelMapLayout.setVerticalGroup(
             PanelMapLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGap(0, 262, Short.MAX_VALUE)
         );
 
-        jButton3.setText("Pending");
+        jButton3.setText("jButton3");
         jButton3.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton3ActionPerformed(evt);
@@ -216,19 +207,19 @@ public class TestGUI extends javax.swing.JFrame {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(PanelMap, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addGap(79, 79, 79)
                         .addComponent(jButton3)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButton1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButton2)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton4)))
+                        .addComponent(jButton4)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(PanelMap, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -246,44 +237,55 @@ public class TestGUI extends javax.swing.JFrame {
         );
 
         pack();
-    }// </editor-fold>                        
+    }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {                                         
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
-        //this.LoadMap("C:\\Users\\Ociel\\Desktop\\Mapas\\mapa2.txt");
-        this.LoadMap("C:\\MyProject\\AStar-master\\Mapas\\mapa4.txt");
+        this.LoadMap("C:\\Users\\Ociel\\Desktop\\Mapas\\mapa2.txt");
         //Coordinate _coCoordinate = this.FindInitMap();
         tMap = TransformMap();
         PaintMap(tMap);
-    }                                        
+    }//GEN-LAST:event_jButton1ActionPerformed
 
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {                                         
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
         _astar = new AStar(tMap);
-        Node _track = _astar.InitProcess().Parent;
-        while (!_track.Coordinates.CompareTo(_astar._coordinateInit))
+        Node _camino = _astar.InitProcess().Parent;
+        while (!_camino.Coordinates.CompareTo(_astar._coordinateInit))
         {
-            imageMap[_track.Coordinates.X][_track.Coordinates.Y].setIcon(new javax.swing.ImageIcon(getClass().getResource("/GUI/solve.png")));
-            _track = _track.Parent;
+            imageMap[_camino.Coordinates.X][_camino.Coordinates.Y].setIcon(new javax.swing.ImageIcon(getClass().getResource("/GUI/solve.png")));
+            _camino = _camino.Parent;
         }
-    }                                        
+    }//GEN-LAST:event_jButton2ActionPerformed
 
-    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {                                         
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
         // TODO add your handling code here:
-        this.LoadTree("C:\\MyProject\\AStar-master\\Mapas\\mapa3.txt");
-    }                                        
+        this.LoadTree("C:\\Users\\Ociel\\Desktop\\Mapas\\mapa3.txt");
+        _astartree = new AStarTree(Costs);
+        int _letra = "Z".charAt(0) - 65;
+        Node _camino = _astartree.InitProcess(Nodes.get(_letra), "A");
+        String path = "";
+        JOptionPane.showConfirmDialog(this, "Costo Total = " + String.valueOf(_camino.Cost));
+        while (!_camino.ID.equalsIgnoreCase(_astartree.InitValue))
+        {
+            path = " --> " + _camino.ID + path;
+            _camino = _camino.Parent;
+        }
+        path = _camino.ID + path;
+        JOptionPane.showConfirmDialog(this, path);
+    }//GEN-LAST:event_jButton3ActionPerformed
 
     int colorsolve = 0;
-    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {                                         
+    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
         // TODO add your handling code here:
-        Node _track = _astar.ContinuesSeek();
+/*        Node _track = _astar.ContinuesSeek();
         while (!_track.Coordinates.CompareTo(_astar._coordinateInit))
         {
             imageMap[_track.Coordinates.X][_track.Coordinates.Y].setIcon(new javax.swing.ImageIcon(getClass().getResource("/GUI/solve" + String.valueOf(colorsolve) + ".png")));
             _track = _track.Parent;
         }
-        colorsolve++;
-    }                                        
+        colorsolve++;*/
+    }//GEN-LAST:event_jButton4ActionPerformed
 
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
@@ -316,11 +318,11 @@ public class TestGUI extends javax.swing.JFrame {
             }
         });
     }
-    // Variables declaration - do not modify                     
+    // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel PanelMap;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;
-    // End of variables declaration                   
+    // End of variables declaration//GEN-END:variables
 }

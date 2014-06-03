@@ -26,7 +26,8 @@ public class Node {
         Coordinates = pCoordinates;
         Parent = pParent;
         Cost = pCost;
-        this.CalculateHeuristics(pCoordinates, pGoalCoordinates);
+        if (pCoordinates != null)
+            this.CalculateHeuristics(pCoordinates, pGoalCoordinates);
         if (pParent != null)
             this.CalculateCost(pParent.Cost, Cost);
         else
